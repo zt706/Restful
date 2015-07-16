@@ -129,7 +129,7 @@ public class NotFoundRecommend
 					{
 						HashSet<Long> filterIdSet = new HashSet<>();
 						
-						// 生成重复id的集合
+						// 生成过滤id的集合
 						filterIdSet = filterId2Set(filterIds);
 						
 						String[] recommendArr = recommendPidsStr.split(",");
