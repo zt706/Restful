@@ -18,6 +18,7 @@ import br.com.restful.recommend.CommonTools;
 /*
  *  从 10.0.22.106:1522 读出数据
  *  写入 10.0.22.104:11311 cache 服务器
+ *  作为全局的过滤商品id
  */
 
 public class CacheProductInfo 

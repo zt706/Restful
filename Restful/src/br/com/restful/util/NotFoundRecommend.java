@@ -86,7 +86,7 @@ public class NotFoundRecommend
 	    	String [] static_recomm_ids = RECOMMENDIDS.split(",");
 	    	
 	    	HashSet<Long> filterIdSet = new HashSet<>();
-			// 生成重复id的集合
+			// 生成过滤id的集合
 			filterIdSet = filterId2Set(filterIds);
 
 			for (int i = 0; i < static_recomm_ids.length; i++)
@@ -107,7 +107,7 @@ public class NotFoundRecommend
 				}
 			}
 			
-			// 返回去重后的默认推荐物品
+			// 返回过滤后的默认推荐物品
 	    	return recomm_ids_str;
 	    }
 		 

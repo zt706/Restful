@@ -1,7 +1,6 @@
 package br.com.restful.recommend;
 
 import java.io.FileInputStream;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -25,6 +24,7 @@ import com.sun.jersey.core.impl.provider.entity.XMLJAXBElementProvider.Text;
 import sun.net.www.http.KeepAliveCache;
 import br.com.restful.db.*;
 import br.com.restful.recommend.JsonUtil;
+import br.com.restful.util.ArticlePageRecommend;
 import br.com.restful.util.CartRecommend;
 import br.com.restful.util.CategoryAttentionlistRecomm;
 import br.com.restful.util.HotSaleRecommend;
@@ -54,6 +54,7 @@ public class RecommendService extends HttpServlet {
 			"historyids",
 			"categoryid",
 			"productid",
+			"articleid",
 	};
 	
 	
@@ -62,9 +63,13 @@ public class RecommendService extends HttpServlet {
 		        throws IOException, ServletException
 
 	 { 
+		 	// 只有资讯页才使用的变量
+	        String recommendPidStringV2 = "";
+	        boolean is_article_page = false;
+	        
 		 	// 获得配置文件
-		 	dbProps = getProperties();
-		 	solrProps = getProperties();
+	        dbProps = getProperties();
+	        solrProps = getProperties();
 		 	
 	 		// 设置正确的 MIME 类型（application/json | application/jsonp）和字符编码
 		 	if (request.getParameter("format") != null
@@ -358,6 +363,40 @@ public class RecommendService extends HttpServlet {
 			    			parameterMap.put("recommendpids",recommendPidString);
 		    			}
 		    		}
+		    		else if (parameterMap.get("pagetype").equals("article")
+		    				&& parameterMap.get("articleid") != null 
+		    				&& isNum((parameterMap.get("articleid"))))
+		    		{
+		    			/*
+		    			 * 资讯页推荐
+		    			 */
+		    			
+		    			int articleId = Integer.parseInt(parameterMap.get("articleid"));
+		    			
+		    			if (articleId > 0)
+		    			{
+		    				String filterIds = "";
+		    				
+		    				// 检验过滤商品id
+		    				if(parameterMap.containsKey("filterids") 
+		    						&& parameterMap.get("filterids")!= null
+		    						&& !parameterMap.get("filterids").isEmpty())
+		    				{
+		    					filterIds = parameterMap.get("filterids");
+		    				}
+		    				
+		    				if (parameterMap.get("recomm").equals("guesslike"))
+		    				{
+		    					// 资讯页的猜你喜欢
+		    					recommendPidStringV2 = ArticlePageRecommend.getArticleRecommendIds(dbProps, articleId, filterIds);
+		    					is_article_page = true;
+		    				}
+		    				
+		    				// 存入推荐id
+		    				//parameterMap.put("recommendpids",recommendPidStringV2);
+		    			}
+		    			
+		    		}
 		    		
 		    	}		    	
 		    }
@@ -377,12 +416,27 @@ public class RecommendService extends HttpServlet {
 			   ///RecommService/?pagetype=category&recomm=jingzan&categoryid=122
 			   // &filterids=&format=jsop&callback=jQuery172042133693560026586_1434361809080
 			   
+			   // jsonp 格式
 			   callback_str = parameterMap.get("callback");
-			   json_str = callback_str + "(" + JsonUtil.object2json(parameterMap) + ")";
 			   
+			   if (is_article_page)
+			   {
+				   // 资讯页
+				   json_str = callback_str + "(" + recommendPidStringV2 + ")";
+			   }
+			   else
+			   {
+				   json_str = callback_str + "(" + JsonUtil.object2json(parameterMap) + ")";
+			   }
+			   
+		   }
+		   else if(is_article_page)
+		   {
+			   json_str = recommendPidStringV2;
 		   }
 		   else
 		   {
+			   // json 格式
 			   json_str = JsonUtil.object2json(parameterMap);
 		   }
 			  
