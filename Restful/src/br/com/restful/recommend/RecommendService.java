@@ -1,30 +1,19 @@
 package br.com.restful.recommend;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jdt.internal.compiler.ast.ThisReference;
-
-import com.sun.jersey.core.impl.provider.entity.XMLJAXBElementProvider.Text;
-
-import sun.net.www.http.KeepAliveCache;
-import br.com.restful.db.*;
 import br.com.restful.recommend.JsonUtil;
-import br.com.restful.util.ArticlePageRecommend;
+import br.com.restful.util.ArticlePage;
 import br.com.restful.util.CartRecommend;
 import br.com.restful.util.CategoryAttentionlistRecomm;
 import br.com.restful.util.HotSaleRecommend;
@@ -63,6 +52,8 @@ public class RecommendService extends HttpServlet {
 		        throws IOException, ServletException
 
 	 { 
+		 	long start_time=System.currentTimeMillis();
+	 
 		 	// 只有资讯页才使用的变量
 	        String recommendPidStringV2 = "";
 	        boolean is_article_page = false;
@@ -388,7 +379,8 @@ public class RecommendService extends HttpServlet {
 		    				if (parameterMap.get("recomm").equals("guesslike"))
 		    				{
 		    					// 资讯页的猜你喜欢
-		    					recommendPidStringV2 = ArticlePageRecommend.getArticleRecommendIds(dbProps, articleId, filterIds);
+		    					//recommendPidStringV2 = ArticlePageRecommend.getArticleRecommendIds(dbProps, articleId, filterIds);
+		    					recommendPidStringV2 = ArticlePage.getArticlePageRecommList(articleId);
 		    					is_article_page = true;
 		    				}
 		    				
@@ -443,6 +435,10 @@ public class RecommendService extends HttpServlet {
 	       // 格式化为json/jsonp数据
 	       out.write(json_str);
 	       out.flush();
+	       
+	       long end_time=System.currentTimeMillis();
+	       long time = end_time - start_time;
+	       System.out.println(parameterMap.get("pagetype") + "  used time ===  " + time);
 	}
 	 
 	public static boolean isNum(String str)

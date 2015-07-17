@@ -222,6 +222,13 @@ public class CartRecommend
 		{
 			e.printStackTrace();
 		}
+		finally
+		{
+			if(helper != null)
+			{
+				helper.close();
+			}
+		}
 		
 		return recommStr;
 	}

@@ -86,6 +86,13 @@ public class JingZanInCategory
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		finally
+		{
+			if(dbHelper != null)
+			{
+				dbHelper.close();
+			}
+		} 
 		
 		 // 去掉最后的逗号
 		if (recommendStr.length() > 1)

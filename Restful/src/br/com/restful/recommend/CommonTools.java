@@ -35,11 +35,13 @@ public class CommonTools
 		return props;
 	}
 		 
-	// 获取memcache server 地址
+	// 获取104 memcache server 地址
 	public static String getCacheServer()
 	{
 		Properties props = getProperties();
-		String server_str = props.getProperty("cache_server");
+		String server_str = ""; 
+		
+		server_str = props.getProperty("cache_server");
 		
 		return server_str;
 	}

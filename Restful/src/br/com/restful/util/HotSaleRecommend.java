@@ -109,6 +109,14 @@ public class HotSaleRecommend
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		finally
+		{
+			if(dbHelper != null)
+			{
+				dbHelper.close();
+			}
+		}  
+		 
 		return recommendStr;
 	}
 	

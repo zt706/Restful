@@ -54,10 +54,11 @@ public class VipRecommend
 			}
 		}
 		
+		DBHelper helper = null;
 		try
 		{
 			parserDBProperties(props);
-			DBHelper helper = LitbDBPool.getRecommendDbHelper(DB_RECOMM_CONN_STR, DB_RECOMM_USER_NAME, DB_RECOMM_PASSWORD);
+			helper = LitbDBPool.getRecommendDbHelper(DB_RECOMM_CONN_STR, DB_RECOMM_USER_NAME, DB_RECOMM_PASSWORD);
 			ResultSet resultSet = helper.executeQuery(sqlStr);
 			
 			HashSet<Long> filterSet = new HashSet<Long>();
@@ -116,6 +117,13 @@ public class VipRecommend
 			
 			e.printStackTrace();
 		}
+		finally
+		{
+			if(helper != null)
+			{
+				helper.close();
+			}
+		} 	
 		
 		return recommStr;
 	}

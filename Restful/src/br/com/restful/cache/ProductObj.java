@@ -9,7 +9,7 @@ public class ProductObj implements Serializable
 	private String ProductThumbBig;
 	private String Title;
 	private String Spec;
-	private float Price;
+	private String Price;
 	private String UsageDosage;
 	private String ProductIntro;
 	private String ProducterName;
@@ -27,7 +27,7 @@ public class ProductObj implements Serializable
 		ProductThumbBig = "";
 		Title = "";
 		Spec = "";
-		Price = 0.0f;
+		Price = "";
 		UsageDosage = "";
 		ProductIntro = "";
 		ProducterName = "";
@@ -41,7 +41,7 @@ public class ProductObj implements Serializable
 		
 	public ProductObj(
 					int item_id, String product_thumb, String product_thumb_big, String title
-					, String spec, float price, String usgae_dosage, String product_intro
+					, String spec, String price, String usgae_dosage, String product_intro
 					, String producter_name, String product_code
 					, int is_rx, String general_name, String brand_code, String otc_type
 					) 
@@ -111,12 +111,12 @@ public class ProductObj implements Serializable
 	{
 		Spec = spec;
 	}
-	public float getPrice()
+	public String getPrice()
 	{
 		return Price;
 	}
 	
-	public void setPrice(float price)
+	public void setPrice(String price)
 	{
 		Price = price;
 	}

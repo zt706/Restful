@@ -19,9 +19,9 @@ public class MemcachedConnector
     { 
     	// 指定memcached服务地址 
     	// String[] servers = { "10.0.22.104:11311" };
-    	String tmp_str = CommonTools.getCacheServer();
+    	String tmp_str = CommonTools.getCacheServer();	
     	String[] servers = { tmp_str };
-  
+    	
 	    // 指定memcached服务器负载量  
 	    Integer[] weights ={3};  
 	  
@@ -52,7 +52,7 @@ public class MemcachedConnector
 	    // 不设置连接超时  
 	    pool.setNagle( false );  
 	    pool.setSocketTO( 3000 );  
-	    pool.setSocketConnectTO( 0 );  
+	    pool.setSocketConnectTO( 300 );  
 	  
 	    // 开始初始化 连接池  
 	    pool.initialize();  
@@ -60,10 +60,10 @@ public class MemcachedConnector
 	    // 设置压缩模式  
 //	    //如果超过64k压缩数据  
 //	    mcc.setCompressEnable( true );  
-//	    mcc.setCompressThreshold( 64 * 1024 );  
+//	    mcc.setCompressThreshold( 64 * 1024 ); 
   
     }
-    
+ 
     public static ArrayList<String> getMemKeyList()
     {
     	ArrayList<String> list = new ArrayList<String>();  

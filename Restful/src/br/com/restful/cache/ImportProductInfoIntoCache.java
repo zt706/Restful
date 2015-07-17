@@ -14,6 +14,7 @@ import net.sf.json.JSONObject;
  *  从 10.0.22.106:1522 读出数据
  *  写入 10.0.22.104:11311 cache 服务器
  *  作为资讯页的推荐商品信息
+ *  每个商品一条缓存记录
  */
 
 public class ImportProductInfoIntoCache 
@@ -82,10 +83,18 @@ public class ImportProductInfoIntoCache
 			int item_id = rs.getInt("dyid");
 			String product_thumb = (rs.getString("pic180") == null ? "" : rs.getString("pic180"));
 			String product_thumb_big = (rs.getString("pic800") == null ? "" : rs.getString("pic800"));
+			if (product_thumb_big.length() > 5)
+			{
+				product_thumb_big = product_thumb_big + "_230x230.jpg";
+			}
+			
 			String title = (rs.getString("WARENAME") == null ? "" : rs.getString("WARENAME"));
 			String spec = rs.getString("spec");
 			
 			float price = rs.getFloat("saleprice");
+			DecimalFormat decimalFormat=new DecimalFormat(".00");
+			String product_price_str = decimalFormat.format(price);
+			
 			String usgae_dosage = " "; 
 			String product_intro =  " "; 
 			String producter_name = (rs.getString("producername") == null ? "" : rs.getString("producername"));
@@ -102,7 +111,7 @@ public class ImportProductInfoIntoCache
 										, product_thumb_big
 										, title
 										, spec
-										, price
+										, product_price_str
 										, usgae_dosage
 										, product_intro
 										, producter_name
@@ -138,8 +147,8 @@ public class ImportProductInfoIntoCache
 		JSONObject jsonObject = JSONObject.fromObject(productObj);
 		Date expireDate = new Date(System.currentTimeMillis() + EXPIRE_TIME);
 		
-		//System.out.println("缓存key == " + cache_key);
-		//System.out.println("huan cun value == " + jsonObject.toString());
+		System.out.println("缓存key == " + cache_key);
+		// System.out.println("huan cun value == " + jsonObject.toString());
 		
 		if(MemcachedConnector.mcc.get(cache_key) != null)
 		{
