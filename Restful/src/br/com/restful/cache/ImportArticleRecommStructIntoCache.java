@@ -17,7 +17,7 @@ import br.com.restful.recommend.CommonTools;
 
 
 /*
- *  从 10.0.22.104:11311 cache 读出数据
+ *  从 10.0.22.106:1522 读出数据
  *  写入 10.0.22.104:11311 cache 服务器
  *  作为资讯页的推荐商品信息
  *  每个articleid一条缓存信息
@@ -25,8 +25,6 @@ import br.com.restful.recommend.CommonTools;
 
 public class ImportArticleRecommStructIntoCache 
 {
-	private static long write_num = 0;
-	
 	private static String DB_RECOMM_CONN_STR = "";
 	private static String DB_RECOMM_USER_NAME = "";
 	private static String DB_RECOMM_PASSWORD = "";
@@ -37,7 +35,7 @@ public class ImportArticleRecommStructIntoCache
 				+ " where "
 				+ " site_id = 1 "
 				+ " and "
-				+ " status = 1";
+				+ " status = 1 ";
 	
 	// memcache 中商品id所对应推荐对象的 cache key 前缀
 	private static final String ARTICLE_CACHE_KEY_PRE = "article_recommend_list_";
@@ -83,7 +81,7 @@ public class ImportArticleRecommStructIntoCache
 			{
 				while(resultSet.next())
 				{
-					ArrayList<HashMap<String, String>> recommProductObjList = new ArrayList<>();
+					ArrayList<ProductObj> recommProductObjList = new ArrayList<>();
 					
 					long articleId = resultSet.getLong("articleid");
 				
@@ -122,24 +120,21 @@ public class ImportArticleRecommStructIntoCache
 							for(String recommendPid:recommendArr)
 							{
 								// System.out.println(recommendPid);
-								if (isNum(recommendPid))
+								if(!filterIdSet.contains(Long.parseLong(recommendPid)))
 								{
-									if(!filterIdSet.contains(Long.parseLong(recommendPid)))
+									// 每个推荐出来的id去cache中取出一个jsonobj对象
+									// String product_info_json_str = getProductInfoFromCache(recommendPid);
+									ProductObj productObj = getProductInfoFromCache(recommendPid);
+									
+									if (productObj != null)
 									{
-										// 每个推荐出来的id去cache中取出一个jsonobj对象
-										// String product_info_json_str = getProductInfoFromCache(recommendPid);
-										ProductObj productObj = getProductInfoFromCache(recommendPid);
-										
-										if (productObj != null)
-										{
-											recommProductObjList.add(productObj.toHashMap());
-										}
-										
-										
-										if (recommProductObjList.size() >= MAX_PRODUCT_NUM)
-										{
-											break;
-										}
+										recommProductObjList.add(productObj);
+									}
+									
+									
+									if (recommProductObjList.size() >= MAX_PRODUCT_NUM)
+									{
+										break;
 									}
 								}
 							}
@@ -189,13 +184,16 @@ public class ImportArticleRecommStructIntoCache
 	private static final int EXPIRE_TIME = 30 * 3600 * 1000;
 		
 	// 将对象存入缓存
-	public static void ImportInfoIntoCache(ArrayList<HashMap<String, String>> recommProductObjList, String cache_key) throws SQLException
+	public static void ImportInfoIntoCache(ArrayList<ProductObj> recommProductObjList, String cache_key) throws SQLException
 	{
-		HashMap<String, ArrayList<HashMap<String, String>>> recomm_cache_map = new HashMap<>();
+		HashMap<String, ArrayList<ProductObj>> recomm_cache_map = new HashMap<>();
 		recomm_cache_map.put("Products", recommProductObjList);
 		
 		JSONObject jsonObject = JSONObject.fromObject(recomm_cache_map);
 		Date expireDate = new Date(System.currentTimeMillis() + EXPIRE_TIME);
+		
+		System.out.println("缓存key == " + cache_key);
+		//System.out.println("huan cun value == " + jsonObject.toString());
 		
 		if(MemcachedConnector.mcc.get(cache_key) != null)
 		{
@@ -208,10 +206,6 @@ public class ImportArticleRecommStructIntoCache
 			MemcachedConnector.mcc.add(cache_key, jsonObject.toString(), expireDate);
 			
 		}
-		
-		write_num ++;
-		System.out.println(write_num + " == 缓存key == " + cache_key);
-		//System.out.println("huan cun value == " + jsonObject.toString());
 	}
 	
 	public static boolean isNum(String str)
@@ -223,9 +217,9 @@ public class ImportArticleRecommStructIntoCache
 	private static void parserDBProperties(Properties props)
 	{
 		
-		DB_RECOMM_CONN_STR = props.getProperty("db_recomm_conn_str_104");
-		DB_RECOMM_USER_NAME = props.getProperty("db_recomm_user_name_104");
-		DB_RECOMM_PASSWORD = props.getProperty("db_recomm_password_104");
+		DB_RECOMM_CONN_STR = props.getProperty("db_recomm_conn_str");
+		DB_RECOMM_USER_NAME = props.getProperty("db_recomm_user_name");
+		DB_RECOMM_PASSWORD = props.getProperty("db_recomm_password");
 	}
 	
 	// 使用文章id生成cache key

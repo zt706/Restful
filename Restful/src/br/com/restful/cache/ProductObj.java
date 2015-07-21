@@ -1,8 +1,6 @@
 package br.com.restful.cache;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.util.HashMap;
 
 public class ProductObj implements Serializable
 {
@@ -11,7 +9,7 @@ public class ProductObj implements Serializable
 	private String ProductThumbBig;
 	private String Title;
 	private String Spec;
-	private float Price;
+	private String Price;
 	private String UsageDosage;
 	private String ProductIntro;
 	private String ProducterName;
@@ -29,7 +27,7 @@ public class ProductObj implements Serializable
 		ProductThumbBig = "";
 		Title = "";
 		Spec = "";
-		Price = 0.0f;
+		Price = "";
 		UsageDosage = "";
 		ProductIntro = "";
 		ProducterName = "";
@@ -43,7 +41,7 @@ public class ProductObj implements Serializable
 		
 	public ProductObj(
 					int item_id, String product_thumb, String product_thumb_big, String title
-					, String spec, float price, String usgae_dosage, String product_intro
+					, String spec, String price, String usgae_dosage, String product_intro
 					, String producter_name, String product_code
 					, int is_rx, String general_name, String brand_code, String otc_type
 					) 
@@ -113,12 +111,12 @@ public class ProductObj implements Serializable
 	{
 		Spec = spec;
 	}
-	public float getPrice()
+	public String getPrice()
 	{
 		return Price;
 	}
 	
-	public void setPrice(float price)
+	public void setPrice(String price)
 	{
 		Price = price;
 	}
@@ -207,29 +205,5 @@ public class ProductObj implements Serializable
 	public void setOtctype(String otctype)
 	{
 		this.otctype = otctype;
-	}
-	
-	public HashMap<String, String> toHashMap()
-	{
-		DecimalFormat decimalFormat=new DecimalFormat(".00");
-		
-		HashMap<String, String> keyValueMap = new HashMap<>();
-		
-		keyValueMap.put("BrandCode", BrandCode);
-		keyValueMap.put("GeneralName", GeneralName);
-		keyValueMap.put("IsRx", IsRx + "");
-		keyValueMap.put("ItemId", ItemId + "");
-		keyValueMap.put("OtcType", otctype);
-		keyValueMap.put("Price", decimalFormat.format(Price));
-		keyValueMap.put("ProductCode", ProductCode);
-		keyValueMap.put("ProductIntro", ProductIntro);
-		keyValueMap.put("ProductThumb", ProductThumb);
-		keyValueMap.put("ProductThumbBig", ProductThumbBig + "_230x230.jpg");
-		keyValueMap.put("ProducterName", ProducterName);
-		keyValueMap.put("Spec", Spec);
-		keyValueMap.put("Title", Title);
-		keyValueMap.put("UsageDosage", UsageDosage);
-		
-		return keyValueMap;
 	}
 }

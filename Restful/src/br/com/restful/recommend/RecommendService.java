@@ -406,7 +406,7 @@ public class RecommendService extends HttpServlet {
 			   && !parameterMap.get("callback").isEmpty())
 		   {
 			   ///RecommService/?pagetype=category&recomm=jingzan&categoryid=122
-			   // &filterids=&format=jsonp&callback=jQuery172042133693560026586_1434361809080
+			   // &filterids=&format=jsop&callback=jQuery172042133693560026586_1434361809080
 			   
 			   // jsonp 格式
 			   callback_str = parameterMap.get("callback");
@@ -438,7 +438,7 @@ public class RecommendService extends HttpServlet {
 	       
 	       long end_time=System.currentTimeMillis();
 	       long time = end_time - start_time;
-	       //System.out.println(parameterMap.get("pagetype") + "  used time ===  " + time);
+	       System.out.println(parameterMap.get("pagetype") + "  used time ===  " + time);
 	}
 	 
 	public static boolean isNum(String str)
