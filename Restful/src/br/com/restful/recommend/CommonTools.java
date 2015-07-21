@@ -13,8 +13,8 @@ import br.com.restful.cache.MemcachedConnector;
 
 public class CommonTools 
 {
-	private static String propsFile = "E:\\workspace\\Restful\\Restful\\config\\recomm-database.properties";
-	//private static String propsFile = "/home/recomm/recommendconf/recomm-database.properties";
+	//private static String propsFile = "E:\\workspace\\Restful\\Restful\\config\\recomm-database.properties";
+	private static String propsFile = "/home/recomm/recommendconf/recomm-database.properties";
 	
 	// 获得配置文件对象
 	public static Properties getProperties()

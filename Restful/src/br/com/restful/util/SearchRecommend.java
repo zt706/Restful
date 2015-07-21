@@ -34,7 +34,7 @@ public class SearchRecommend
 			}
 		}
 				
-		System.out.println(" ++++ " + filterIds);
+		// System.out.println(" ++++ " + filterIds);
 		
 		String productInfoStr = "";
 		ArrayList<String> productInfoList = new ArrayList<String>();
