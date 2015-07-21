@@ -20,9 +20,6 @@ public class ArticlePage
 		String cache_key = ImportArticleRecommStructIntoCache.getArticleCacheKey(articleId);
 		String json_str = "";
 		
-		// if (cacheKey.equals("2015-6-9-16_tianmao"))
-			// System.out.println("key == " + cacheKey + " value == " + MemcachedConnector.mcc.get(cacheKey));
-		
 		if(MemcachedConnector.mcc.get(cache_key) != null)
 		{
 			json_str = (String) MemcachedConnector.mcc.get(cache_key);

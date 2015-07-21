@@ -92,8 +92,6 @@ public class ImportProductInfoIntoCache
 			String spec = rs.getString("spec");
 			
 			float price = rs.getFloat("saleprice");
-			DecimalFormat decimalFormat=new DecimalFormat(".00");
-			String product_price_str = decimalFormat.format(price);
 			
 			String usgae_dosage = " "; 
 			String product_intro =  " "; 
@@ -111,7 +109,7 @@ public class ImportProductInfoIntoCache
 										, product_thumb_big
 										, title
 										, spec
-										, product_price_str
+										, price
 										, usgae_dosage
 										, product_intro
 										, producter_name
