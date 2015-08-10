@@ -17,6 +17,7 @@ import br.com.restful.util.ArticlePage;
 import br.com.restful.util.CartRecommend;
 import br.com.restful.util.CategoryAttentionlistRecomm;
 import br.com.restful.util.HotSaleRecommend;
+import br.com.restful.util.IndexPageRecommend;
 import br.com.restful.util.JingZanInCategory;
 import br.com.restful.util.JingZanInProduct;
 import br.com.restful.util.NotFoundRecommend;
@@ -42,7 +43,6 @@ public class RecommendService extends HttpServlet {
 			"userid",
 			"historyids",
 			"categoryid",
-			"productid",
 			"articleid",
 	};
 	
@@ -57,6 +57,10 @@ public class RecommendService extends HttpServlet {
 		 	// 只有资讯页才使用的变量
 	        String recommendPidStringV2 = "";
 	        boolean is_article_page = false;
+	        
+	        // 只有首页才使用的变量
+	        String recommendPidStringV3 = "";
+	        boolean is_index_page = false;
 	        
 		 	// 获得配置文件
 	        dbProps = getProperties();
@@ -112,24 +116,17 @@ public class RecommendService extends HttpServlet {
 		    		 * 商品详情页
 		    		 */
 		    		if(parameterMap.get("pagetype").equals("product")
-		    				&& (
-			    				(parameterMap.get("goodsid") != null && isNum(parameterMap.get("goodsid")))
-			    				|| ((parameterMap.get("productid") != null) && isNum(parameterMap.get("productid")))
-		    				   ))
+		    			&& (parameterMap.get("goodsid") != null && isNum(parameterMap.get("goodsid")))
+		    		  )
 		    		{
 		    			long goodsId = 0;
-		    			int productId = 0;
 		    			
 		    			if (parameterMap.get("goodsid") != null && !parameterMap.get("goodsid").isEmpty())
 		    			{
 		    				goodsId = Long.parseLong(parameterMap.get("goodsid"));
 		    			}
-		    			else if (parameterMap.get("productid") != null && !parameterMap.get("productid").isEmpty())
-		    			{
-		    				productId = Integer.parseInt(parameterMap.get("productid"));
-		    			}
 		    			
-		    			if(goodsId > 0 || productId > 0)
+		    			if(goodsId > 0)
 		    			{
 		    				String filterIds = "";
 		    				String recommendPidString = "";
@@ -155,24 +152,9 @@ public class RecommendService extends HttpServlet {
 			    			}
 			    			else if(parameterMap.get("recomm").equals("jingzan"))
 			    			{
-			    				long ids;
-			    				int ids_flag;
-			    				
-			    				if (parameterMap.get("goodsid") != null && !parameterMap.get("goodsid").isEmpty())
-			    				{
-			    					// 使用goodsid
-			    					ids = goodsId;
-			    					ids_flag = 0;
-			    				}
-			    				else
-			    				{
-			    					// 使用动易id
-			    					ids = productId;
-			    					ids_flag = 1;
-			    				}
-			    				
+			    				// 使用goodsid
 			    				// 获取商品详情页jingzan区块的推荐数据
-			    				recommendPidString = JingZanInProduct.getRecommendData(dbProps, ids, filterIds, ids_flag);
+			    				recommendPidString = JingZanInProduct.getRecommendData(dbProps, goodsId, filterIds);
 			    			}
 		    				
 		    				parameterMap.put("recommendpids",recommendPidString);
@@ -389,7 +371,50 @@ public class RecommendService extends HttpServlet {
 		    			}
 		    			
 		    		}
-		    		
+		    		else if (parameterMap.get("pagetype").equals("indexpage")
+		    				&& parameterMap.get("recomm").equals("indexguesslike"))
+		    		{
+		    			/*
+		    			 * 首页推荐
+		    			 */
+		    			String pageType = parameterMap.get("pagetype");
+		    			String recomm = parameterMap.get("recomm");
+		    			
+		    			String filterIds = "";
+		    			String recommendPidString = "";
+	    				
+	    				if(parameterMap.containsKey("filterids")
+	    					&& parameterMap.get("filterids") != null
+	    					&& !parameterMap.get("filterids").isEmpty())
+	    				{
+	    					filterIds = parameterMap.get("filterids");
+	    				}
+
+	    				// userid可以没有内容,但是一定要写
+	    				if ((parameterMap.containsKey("userid") 
+					    	&& parameterMap.get("userid") != null)
+					    	&&
+					    	(parameterMap.containsKey("historyids") 
+				    		&& parameterMap.get("historyids") != null
+				    		))
+	    				{
+	    					String userId = "";
+	    					String historyIds = "";
+	    					
+	    					if (isNum(parameterMap.get("userid")))
+	    					{
+	    						//userId = parameterMap.get("userid");
+	    					}
+	    					
+	    					historyIds = parameterMap.get("historyids");
+	    					
+	    					recommendPidStringV3 = IndexPageRecommend.getRecommendData(dbProps, userId, historyIds, filterIds
+	    											, pageType
+	    											, recomm
+	    											);
+	    					is_index_page = true;
+	    				}
+		    		}
 		    	}		    	
 		    }
 	        
@@ -422,14 +447,22 @@ public class RecommendService extends HttpServlet {
 			   }
 			   
 		   }
-		   else if(is_article_page)
-		   {
-			   json_str = recommendPidStringV2;
-		   }
 		   else
 		   {
 			   // json 格式
-			   json_str = JsonUtil.object2json(parameterMap);
+			   
+			   if(is_article_page)
+			   {
+				   json_str = recommendPidStringV2;
+			   }
+			   else if (is_index_page)
+			   {
+				   json_str = recommendPidStringV3;
+			   }
+			   else
+			   {
+				   json_str = JsonUtil.object2json(parameterMap);
+			   }
 		   }
 			  
 	       // 格式化为json/jsonp数据
@@ -453,6 +486,12 @@ public class RecommendService extends HttpServlet {
 	public static Properties getProperties()
 	{
 		return CommonTools.getProperties();
+	}
+	
+	// 获取返回的参数列表
+	public static String [] getQueryKeyArry()
+	{
+		return QUERYKEYARR;
 	}
 	
 	public static void main(String [] args) throws SQLException

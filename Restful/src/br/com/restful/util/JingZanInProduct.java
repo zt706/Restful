@@ -25,30 +25,12 @@ public class JingZanInProduct
 			+ " and status = 1"
 			+ " and goodsid = %s";
 	
-	private static final  String QUERYSQL_PRODUCTID= "select * from recom_product_jingzan_recomm"
-			+ " where "
-			+ " site_id = 1 "
-			+ " and "
-			+ " status = 1 "
-			+ " and "
-			+ " productid = %s "
-			+ " and"
-			+ " recommendid <> productid "
-			+ " order by frequency desc";
-	
-	public static String getRecommendData(Properties props, long Ids, String filterIds, int flag)
+	public static String getRecommendData(Properties props, long Ids, String filterIds)
 	{
-		 String recommendStr = Ids + "";
+		String recommendStr = Ids + "";
 		
-		 String query_sql = "";
-		 if (flag == 0)
-		 {
-			 query_sql = String.format(QUERYSQL_GOODSID, Ids);
-		 }
-		 else if (flag == 1)
-		 {
-			 query_sql = String.format(QUERYSQL_PRODUCTID, Ids);
-		 }
+		String query_sql = "";
+		query_sql = String.format(QUERYSQL_GOODSID, Ids); 
 		 
 		 //System.out.println(query_sql);
 		 DBHelper dbHelper = null;
@@ -62,22 +44,15 @@ public class JingZanInProduct
 			
 			if(resultSet != null)
 			{
-				while(resultSet.next())
+				if(resultSet.next())
 				{
 					String recommendPidsStr = "";
 					
-					if (flag == 0)
-					{
-						recommendPidsStr = resultSet.getString("recommends");
-					}
-					else if (flag == 1)
-					{
-						recommendPidsStr = resultSet.getString("recommendid");
-					}
+					recommendPidsStr = resultSet.getString("recommends");
 					
 					if(recommendPidsStr != null && !recommendPidsStr.isEmpty())
 					{
-						HashSet<Integer> filterIdSet = new HashSet<>();
+						HashSet<Long> filterIdSet = new HashSet<>();
 						
 						if(filterIds.length() > 0)
 						{
@@ -90,7 +65,7 @@ public class JingZanInProduct
 								{
 									if(isNum(filterId))
 									{
-										filterIdSet.add(Integer.parseInt(filterId));
+										filterIdSet.add(Long.parseLong(filterId));
 									}
 									else {
 										// System.out.println("过滤id非法  " + filterId);
@@ -108,9 +83,16 @@ public class JingZanInProduct
 							for(String recommendPid:recommendArr)
 							{
 								// System.out.println(recommendPid);
-								if(!filterIdSet.contains(Integer.parseInt(recommendPid)))
+								if(!filterIdSet.contains(Long.parseLong(recommendPid)))
 								{
-									recommendStr += "," + recommendPid;
+									if (recommendStr.length() > 0)
+									{
+										recommendStr += "," + recommendPid;
+									}
+									else
+									{
+										recommendStr += recommendPid;
+									}
 								}
 							}
 						}

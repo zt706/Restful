@@ -20,11 +20,10 @@ public class JingZanInCategory
 	private static String DB_RECOMM_PASSWORD = "";
 	
 	private static final String QUERYSQL = "select *"
-			+ " from recom_category_jingzan_recomm"
+			+ " from recom_category_hot_sale"
 			+ " where site_id = 1"
 			+ " and status = 1"
-			+ " and categoryid = %s"
-			+ " order by frequency desc";
+			+ " and categoryid = %s";
 	
 	public static String getRecommendData(Properties props, int categoryIds, String filterIds)
 	{
@@ -43,15 +42,15 @@ public class JingZanInCategory
 			
 			if(resultSet != null)
 			{
-				while(resultSet.next())
+				if(resultSet.next())
 				{
 					String recommendPidsStr = "";
 					
-					recommendPidsStr = resultSet.getString("recommendid") ;
+					recommendPidsStr = resultSet.getString("recommends") ;
 					
 					if(recommendPidsStr != null && !recommendPidsStr.isEmpty())
 					{
-						HashSet<Integer> filterIdSet = new HashSet<>();
+						HashSet<Long> filterIdSet = new HashSet<>();
 						
 						if(filterIds.length() > 0)
 						{
@@ -64,7 +63,7 @@ public class JingZanInCategory
 								{
 									if(isNum(filterId))
 									{
-										filterIdSet.add(Integer.parseInt(filterId));
+										filterIdSet.add(Long.parseLong(filterId));
 									}
 									else {
 										//System.out.println("过滤id非法  " + filterId);
@@ -74,13 +73,25 @@ public class JingZanInCategory
 							}
 						}
 						
-						// System.out.println("tui jian id " + recommendPidsStr);
-						if(!filterIdSet.contains(Integer.parseInt(recommendPidsStr)))
+						String [] recommendPidArr = recommendPidsStr.split(",");
+						if (recommendPidArr != null && recommendPidArr.length > 0)
 						{
-							recommendStr += recommendPidsStr +  ",";
+							for (int i = 0; i < recommendPidArr.length; i++)
+							{
+								if(!filterIdSet.contains(Long.parseLong(recommendPidArr[i])))
+								{
+									if (recommendStr.length() > 0)
+									{
+										recommendStr += "," + recommendPidArr[i];
+									}
+									else
+									{
+										recommendStr += recommendPidArr[i];
+									}
+								}
+							}
 						}
 					}
-					
 				}
 			}
 		} catch (SQLException e) {

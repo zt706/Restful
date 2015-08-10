@@ -2,15 +2,21 @@ package br.com.restful.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Properties;
 
+import net.sf.json.JSONObject;
 import br.com.restful.db.DBHelper;
 import br.com.restful.db.LitbDBPool;
 import br.com.restful.recommend.CommonTools;
 
-public class NotFoundRecommend
+/*
+ * 	首页推荐
+ */
+
+public class IndexPageRecommend
 {
 	private static String DB_RECOMM_CONN_STR = "";
 	private static String DB_RECOMM_USER_NAME = "";
@@ -31,9 +37,16 @@ public class NotFoundRecommend
 	// 默认返回的推荐物品
 	private static final String RECOMMENDIDS = "268,45972,2066";
 	
-	public static String getRecommendData(Properties props, String userId, String historyIds, String filterIds)
+	public static String getRecommendData(Properties props, String userId, String historyIds, String filterIds
+							, String pageType
+							, String recomm
+							)
 	{
 		// System.out.println("goods is === " + userId);
+		
+		String input_filter_ids = filterIds;
+		String page_type = pageType;
+		String recomm_str = recomm;
 		
 		// 将全站统一过滤id加入过滤ids
 		String web_filter_str = CommonTools.getWebFilterIds(props);
@@ -110,7 +123,25 @@ public class NotFoundRecommend
 			// 返回过滤后的默认推荐物品
 	    	return recomm_ids_str;
 	    }
-		 
+		
+	    // 最后赋值给recommendpids的map
+	    HashMap<String, ArrayList<HashMap<String, String>>> recommendPids_map = new HashMap<>();
+	    
+	    // 用historyids 生成的推荐商品list
+	    ArrayList<HashMap<String, String>> recomm_history_pid_list = new ArrayList<>();
+	    // 用userid 生成的推荐商品list
+	    ArrayList<HashMap<String, String>> recomm_user_id_list = new ArrayList<>();
+	    
+	    // 存放所有传入的historyid的数组
+	    ArrayList<String> history_arr = new ArrayList<>();
+	    
+	    // 将收到的historyIds存入list
+	    String [] history_split_str = historyIds.split(",");
+	    for (int i = 0; i < history_split_str.length; i++)
+	    {
+	    	history_arr.add(i, history_split_str[i]);
+	    }
+	    
 		//System.out.println(query_sql);
 		DBHelper dbHelper = null;
 		 
@@ -122,8 +153,16 @@ public class NotFoundRecommend
 			
 			if(resultSet != null)
 			{
+				int history_id_index = 0;
+				
 				while(resultSet.next())
 				{
+					// 每个historyid对应的推荐id过滤后的内容
+					String recommIdsStr = "";		
+					
+					// 存放每个historyid及其对应的推荐商品的map
+				    HashMap<String, String> recomm_history_map = new HashMap<>();
+				    
 					String recommendPidsStr = resultSet.getString("recommends");
 					if(recommendPidsStr != null && !recommendPidsStr.isEmpty())
 					{
@@ -141,19 +180,56 @@ public class NotFoundRecommend
 								//System.out.println(recommendPid);
 								if(!filterIdSet.contains(Long.parseLong(recommendPid)))
 								{
-									if(recommendStr.length() > 0)
+									if(recommIdsStr.length() > 0)
 									{
-										recommendStr += "," + recommendPid;
+										recommIdsStr += "," + recommendPid;
 									}
 									else{
-										recommendStr += recommendPid;
+										recommIdsStr += recommendPid;
 									}
 								}
+								
+								// 将推荐出来的商品加入过滤id中,作为下一个推荐列表的过滤id
+								filterIds += "," + recommendPid;
 							}
 						}
 					}
 					
+					String history_id = history_arr.get(history_id_index);
+					
+					//recomm_history_map.put(history_id, recommIdsStr);
+					recomm_history_map.put("historyid", history_id);
+					recomm_history_map.put("recommids", recommIdsStr);
+					
+					recomm_history_pid_list.add(recomm_history_map);
+					recommendPids_map.put("recommend_ids_for_history", recomm_history_pid_list);
+					
+					recommendPids_map.put("recommend_ids_for_userid", recomm_user_id_list);
+					
+					history_id_index++;
 				}
+				
+				// 生成返回需要的结构体
+				IndexPageRecommStruct recomm_struct = new IndexPageRecommStruct
+															  (
+																page_type,
+																recomm_str,
+																"",
+																"",
+																input_filter_ids,
+																"",
+																userId,
+																historyIds,
+																"",
+																"",
+																recommendPids_map
+															  );
+				
+				JSONObject jsonObject = JSONObject.fromObject(recomm_struct);
+				
+				recommendStr = jsonObject.toString();
+				
+				System.out.println("9090909 " + jsonObject);
 			}
 		} 
 		catch (SQLException e) {
@@ -214,3 +290,4 @@ public class NotFoundRecommend
 		DB_RECOMM_PASSWORD = props.getProperty("db_recomm_password");
 	}
 }
+
